@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Production service - stdio transport (for MCP clients like Claude Desktop)
+  open-meteo-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: open-meteo-mcp
+    environment:
+      - OPEN_METEO_API_KEY=${OPEN_METEO_API_KEY:-}
+      - OPEN_METEO_TIMEOUT=30.0
+      - OPEN_METEO_TIMEZONE=GMT
+      - OPEN_METEO_RATE_LIMIT=0.1
+    restart: unless-stopped
+    # For stdio transport, no ports needed (communicates via stdin/stdout)
+    stdin_open: true
+    tty: true
+
+  # SSE service - for remote HTTP access
+  open-meteo-sse:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: open-meteo-mcp-sse
+    ports:
+      - "8000:8000"
+    environment:
+      - OPEN_METEO_API_KEY=${OPEN_METEO_API_KEY:-}
+      - OPEN_METEO_TIMEOUT=30.0
+      - OPEN_METEO_TIMEZONE=GMT
+      - OPEN_METEO_RATE_LIMIT=0.1
+    command: ["python", "-m", "src.server", "--transport", "sse", "--port", "8000"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Development service - runs tests
+  open-meteo-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: open-meteo-mcp-dev
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+    environment:
+      - OPEN_METEO_API_KEY=${OPEN_METEO_API_KEY:-}
+      - OPEN_METEO_TIMEOUT=30.0
+      - OPEN_METEO_TIMEZONE=GMT
+    command: ["python", "-m", "pytest", "tests/", "-v", "--tb=short"]
+    profiles:
+      - dev
+
+  # Test service - one-time test run
+  open-meteo-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: open-meteo-mcp-test
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+    environment:
+      - OPEN_METEO_API_KEY=${OPEN_METEO_API_KEY:-}
+    command: ["python", "-m", "pytest", "tests/", "-v", "--tb=short", "--cov=src"]
+    profiles:
+      - test

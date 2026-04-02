@@ -1,0 +1,16 @@
+# Core dependencies
+mcp>=1.0.0
+httpx>=0.25.0
+pydantic>=2.0.0
+
+# SSE transport support (for remote access)
+uvicorn>=0.24.0
+starlette>=0.27.0
+
+# Development dependencies
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+ruff>=0.1.0
+mypy>=1.0.0
+pytest-cov>=4.0.0
