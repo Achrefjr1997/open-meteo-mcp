@@ -28,6 +28,10 @@ jobs:
         run: |
           ruff check src/ tests/
 
+      - name: Format with black (auto-fix)
+        run: |
+          black src/ tests/
+
       - name: Check formatting with black
         run: |
           black --check src/ tests/
