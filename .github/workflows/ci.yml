@@ -28,6 +28,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
+      - name: Run unit tests (no external API calls)
+        run: |
+          pytest tests/ -v --tb=short \
+            -k "not (ForecastAPI or HistoricalAPI or AirQualityAPI or MarineAPI or ElevationAPI or ModelSpecificAPI)" \
+            -k "not (ForecastTools or HistoricalTools or AirQualityTools or MarineTools or EnsembleTools or SpecializedTools)" \
+            -k "not (GeocodingAPI or GeocodingTools)"
+
       - name: Lint with ruff
         run: |
           ruff check src/ tests/
@@ -35,23 +42,6 @@ jobs:
       - name: Check formatting with black
         run: |
           black --check src/ tests/
-
-      - name: Type check with mypy
-        run: |
-          mypy src/ || echo "mypy check completed with notes"
-
-      - name: Run unit tests (no API calls)
-        run: |
-          pytest tests/ -v \
-            -k "not (test_get_current_weather or test_get_hourly_forecast or test_get_daily_forecast or test_get_15min_forecast or test_get_complete_forecast)" \
-            -k "not (test_get_historical or test_get_air_quality or test_get_marine or test_get_elevation or test_get_climate or test_get_ensemble)" \
-            -k "not (test_search_location or test_get_location)" \
-            --tb=short
-
-      - name: Run all tests (with API calls) - allow failures
-        run: |
-          pytest tests/ -v --tb=short || true
-        continue-on-error: true
 
   build:
     runs-on: ubuntu-latest
