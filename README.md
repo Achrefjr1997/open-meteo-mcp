@@ -129,7 +129,7 @@ docker compose --profile test up open-meteo-test
 |----------|-------------|---------|----------|
 | `OPEN_METEO_API_KEY` | API key for commercial use (>10k calls/day) | None | ❌ |
 | `OPEN_METEO_TIMEOUT` | Request timeout in seconds | 30.0 | ❌ |
-| `OPEN_METEO_TIMEZONE` | Default timezone | GMT | ❌ |
+| `OPEN_METEO_TIMEZONE` | Default timezone (e.g., `Africa/Tunis`, `Europe/Paris`) | GMT | ❌ |
 | `OPEN_METEO_RATE_LIMIT` | Rate limit delay in seconds | 0.1 | ❌ |
 
 ### Configuration Examples
@@ -138,22 +138,35 @@ docker compose --profile test up open-meteo-test
 ```bash
 export OPEN_METEO_API_KEY=your_api_key
 export OPEN_METEO_TIMEOUT=60.0
-export OPEN_METEO_TIMEZONE=Europe/Berlin
+export OPEN_METEO_TIMEZONE=Africa/Tunis
 ```
 
 **Windows (PowerShell):**
 ```powershell
 $env:OPEN_METEO_API_KEY="your_api_key"
 $env:OPEN_METEO_TIMEOUT="60.0"
-$env:OPEN_METEO_TIMEZONE="Europe/Berlin"
+$env:OPEN_METEO_TIMEZONE="Africa/Tunis"
 ```
 
 **Docker (.env file):**
 ```bash
 OPEN_METEO_API_KEY=your_api_key
 OPEN_METEO_TIMEOUT=60.0
-OPEN_METEO_TIMEZONE=America/New_York
+OPEN_METEO_TIMEZONE=Africa/Tunis
 ```
+
+### Common Timezones
+
+| Region | Timezone |
+|--------|----------|
+| Tunisia | `Africa/Tunis` |
+| France | `Europe/Paris` |
+| Germany | `Europe/Berlin` |
+| UK | `Europe/London` |
+| US Eastern | `America/New_York` |
+| US Pacific | `America/Los_Angeles` |
+| Japan | `Asia/Tokyo` |
+| Australia (Sydney) | `Australia/Sydney` |
 
 ---
 
