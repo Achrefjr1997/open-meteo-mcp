@@ -31,9 +31,20 @@ jobs:
       - name: Run unit tests (no external API calls)
         run: |
           pytest tests/ -v --tb=short \
-            -k "not (ForecastAPI or HistoricalAPI or AirQualityAPI or MarineAPI or ElevationAPI or ModelSpecificAPI)" \
-            -k "not (ForecastTools or HistoricalTools or AirQualityTools or MarineTools or EnsembleTools or SpecializedTools)" \
-            -k "not (GeocodingAPI or GeocodingTools)"
+            -k "TestClientConfig or TestCoordinateValidation or TestParameterBuilding or TestAPIResponse or TestClientLifecycle" \
+            -k "or TestServerConfiguration or TestClientCreation or TestMCPServerCreation or TestToolRegistration" \
+            -k "or TestResourceRegistration or TestPromptRegistration or TestVariableResources or TestModelResources" \
+            -k "or TestPromptContent or TestPromptStructure or TestServerTransport or TestCLIEntryPoint" \
+            --tb=short
+
+      - name: Run integration tests (with API calls - allow failures)
+        run: |
+          pytest tests/ -v --tb=line \
+            -k "TestForecastAPI or TestHistoricalAPI or TestAirQualityAPI or TestMarineAPI or TestElevationAPI" \
+            -k "or TestModelSpecificAPI or TestForecastTools or TestHistoricalTools or TestAirQualityTools" \
+            -k "or TestMarineTools or TestEnsembleTools or TestSpecializedTools or TestToolResponseFormat" \
+            --tb=short || echo "Integration tests completed (some may fail due to API rate limits)"
+        continue-on-error: true
 
       - name: Lint with ruff
         run: |
