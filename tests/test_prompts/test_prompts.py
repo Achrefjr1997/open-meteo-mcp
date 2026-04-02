@@ -9,7 +9,6 @@ Tests the prompts module including:
 - Prompt registration
 """
 
-import pytest
 from mcp.server.fastmcp import FastMCP
 
 from src.prompts import weather_assistant

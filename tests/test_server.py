@@ -10,7 +10,6 @@ Tests the server.py module including:
 """
 
 import os
-import pytest
 from unittest.mock import patch, MagicMock
 
 from mcp.server.fastmcp import FastMCP
@@ -29,7 +28,7 @@ from src.server import (
     run_stdio,
     run_sse,
 )
-from src.client import OpenMeteoClient, ClientConfig
+from src.client import OpenMeteoClient
 
 
 # ==================== Server Configuration Tests ====================

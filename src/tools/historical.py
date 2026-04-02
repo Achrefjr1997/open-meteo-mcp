@@ -441,7 +441,6 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
         
         data = response.data
         hourly = data.get("hourly", {})
-        time = hourly.get("time", [])
         wind_speed = hourly.get("wind_speed_10m", [])
         wind_dir = hourly.get("wind_direction_10m", [])
         wind_gusts = hourly.get("wind_gusts_10m", [])

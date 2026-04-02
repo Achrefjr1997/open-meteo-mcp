@@ -5,11 +5,7 @@ This module creates and configures the MCP server, registering all tools,
 resources, and prompts for the Open-Meteo weather API.
 """
 
-import asyncio
 import os
-import sys
-from typing import Any
-
 from mcp.server.fastmcp import FastMCP
 
 from .client import OpenMeteoClient, ClientConfig

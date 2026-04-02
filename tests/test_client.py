@@ -11,17 +11,13 @@ Tests the client.py module including:
 """
 
 import pytest
-import pytest_asyncio
-from typing import Any
 
 from src.client import (
     OpenMeteoClient,
     ClientConfig,
     APIResponse,
-    OpenMeteoError,
     ValidationError,
     APIError,
-    RateLimitError,
     APIEndpoint,
 )
 

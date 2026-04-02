@@ -9,7 +9,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from ..client import OpenMeteoClient, create_client
+from ..client import OpenMeteoClient
 
 
 # ==================== Current Weather Tools ====================

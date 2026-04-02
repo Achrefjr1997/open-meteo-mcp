@@ -12,10 +12,8 @@ Comprehensive tests for all MCP tools including:
 """
 
 import pytest
-import pytest_asyncio
-from typing import Any
 
-from src.client import OpenMeteoClient, ClientConfig, APIError
+from src.client import OpenMeteoClient, APIError
 from src.tools import forecast, historical, air_quality, geocoding, ensemble, marine, specialized
 from mcp.server.fastmcp import FastMCP
 

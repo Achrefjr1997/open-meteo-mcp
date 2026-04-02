@@ -8,7 +8,6 @@ Tests the resources module including:
 - Resource content validation
 """
 
-import pytest
 from mcp.server.fastmcp import FastMCP
 
 from src.resources import variables as variables_resources, models as models_resources
