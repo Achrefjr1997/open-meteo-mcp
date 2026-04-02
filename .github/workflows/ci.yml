@@ -31,18 +31,13 @@ jobs:
       - name: Run unit tests (no external API calls)
         run: |
           pytest tests/ -v --tb=short \
-            -k "TestClientConfig or TestCoordinateValidation or TestParameterBuilding or TestAPIResponse or TestClientLifecycle" \
-            -k "or TestServerConfiguration or TestClientCreation or TestMCPServerCreation or TestToolRegistration" \
-            -k "or TestResourceRegistration or TestPromptRegistration or TestVariableResources or TestModelResources" \
-            -k "or TestPromptContent or TestPromptStructure or TestServerTransport or TestCLIEntryPoint" \
+            -k "TestClientConfig or TestCoordinateValidation or TestParameterBuilding or TestAPIResponse or TestClientLifecycle or TestServerConfiguration or TestClientCreation or TestMCPServerCreation or TestToolRegistration or TestResourceRegistration or TestPromptRegistration or TestVariableResources or TestModelResources or TestPromptContent or TestPromptStructure or TestServerTransport or TestCLIEntryPoint or TestServerInstructions or TestResourceContent or TestResourceURIPatterns or TestResourceIntegration or TestPromptIntegration or TestPromptCount or TestPromptQuality or TestPromptReturnValues or TestToolCount or TestToolErrorHandling or TestToolResponseFormat or TestConvenienceFunctions or TestAPIEndpoint" \
             --tb=short
 
       - name: Run integration tests (with API calls - allow failures)
         run: |
           pytest tests/ -v --tb=line \
-            -k "TestForecastAPI or TestHistoricalAPI or TestAirQualityAPI or TestMarineAPI or TestElevationAPI" \
-            -k "or TestModelSpecificAPI or TestForecastTools or TestHistoricalTools or TestAirQualityTools" \
-            -k "or TestMarineTools or TestEnsembleTools or TestSpecializedTools or TestToolResponseFormat" \
+            -k "TestForecastAPI or TestHistoricalAPI or TestAirQualityAPI or TestMarineAPI or TestElevationAPI or TestModelSpecificAPI or TestForecastTools or TestHistoricalTools or TestAirQualityTools or TestMarineTools or TestEnsembleTools or TestSpecializedTools or TestGeocodingAPI or TestGeocodingTools" \
             --tb=short || echo "Integration tests completed (some may fail due to API rate limits)"
         continue-on-error: true
 
