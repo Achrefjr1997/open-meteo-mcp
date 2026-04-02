@@ -569,19 +569,5 @@ Weather data provided by Open-Meteo.com
 - **Weather Data Providers**: ECMWF, NOAA, DWD, Météo-France, Met Norway, UK Met Office, ECCC, JMA, and others
 - **Community Contributors** - All who have contributed to this project
 
----
-
-## 📈 Roadmap
-
-- [ ] Add flood API support
-- [ ] Add solar radiation API support
-- [ ] Implement response caching
-- [ ] Add WebSocket transport support
-- [ ] Create official Python SDK
-- [ ] Add more language localizations
-
----
 
 **Built with ❤️ for weather enthusiasts and AI developers**
-
-*Last updated: April 2026*
