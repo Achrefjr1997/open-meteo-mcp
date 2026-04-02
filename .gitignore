@@ -146,9 +146,16 @@ $RECYCLE.BIN/
 docs/_build/
 docs/.doctrees/
 
-# ==================== Optional uv Lock ====================
-# Uncomment if you want to ignore uv.lock
-# uv.lock
+# ==================== Build/Cache Files ====================
+# uv package manager
+uv.lock
+
+# GitHub Actions (keep workflow templates, ignore local builds)
+.github/workflows/*.log
+.github/workflows/*.tmp
+
+# Batch scripts (project specific)
+push-to-github.bat
 
 # ==================== Secrets & Credentials ====================
 # Never commit these
