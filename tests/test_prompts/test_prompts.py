@@ -13,7 +13,6 @@ from mcp.server.fastmcp import FastMCP
 
 from src.prompts import weather_assistant
 
-
 # ==================== Prompt Registration Tests ====================
 
 

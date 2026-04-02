@@ -76,7 +76,7 @@ A comprehensive Model Context Protocol (MCP) server for the [Open-Meteo](https:/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/open-meteo-mcp.git
+git clone https://github.com/Achrefjr1997/open-meteo-mcp.git
 cd open-meteo-mcp
 
 # Create virtual environment
@@ -131,6 +131,13 @@ docker compose --profile test up open-meteo-test
 | `OPEN_METEO_TIMEOUT` | Request timeout in seconds | 30.0 | ❌ |
 | `OPEN_METEO_TIMEZONE` | Default timezone (e.g., `Africa/Tunis`, `Europe/Paris`) | GMT | ❌ |
 | `OPEN_METEO_RATE_LIMIT` | Rate limit delay in seconds | 0.1 | ❌ |
+| `OPEN_METEO_API_URL` | Forecast API base URL | `https://api.open-meteo.com` | ❌ |
+| `OPEN_METEO_AIR_QUALITY_API_URL` | Air quality API base URL | `https://air-quality-api.open-meteo.com` | ❌ |
+| `OPEN_METEO_MARINE_API_URL` | Marine API base URL | `https://marine-api.open-meteo.com` | ❌ |
+| `OPEN_METEO_ENSEMBLE_API_URL` | Ensemble API base URL | `https://ensemble-api.open-meteo.com` | ❌ |
+| `OPEN_METEO_CLIMATE_API_URL` | Climate API base URL | `https://climate-api.open-meteo.com` | ❌ |
+| `OPEN_METEO_GEOCODING_API_URL` | Geocoding API base URL | `https://geocoding-api.open-meteo.com` | ❌ |
+| `OPEN_METEO_ARCHIVE_API_URL` | Archive API base URL | `https://archive-api.open-meteo.com` | ❌ |
 
 ### Configuration Examples
 
@@ -153,6 +160,10 @@ $env:OPEN_METEO_TIMEZONE="Africa/Tunis"
 OPEN_METEO_API_KEY=your_api_key
 OPEN_METEO_TIMEOUT=60.0
 OPEN_METEO_TIMEZONE=Africa/Tunis
+# Custom API URLs (optional)
+OPEN_METEO_API_URL=https://api.open-meteo.com
+OPEN_METEO_AIR_QUALITY_API_URL=https://air-quality-api.open-meteo.com
+OPEN_METEO_MARINE_API_URL=https://marine-api.open-meteo.com
 ```
 
 ### Common Timezones
@@ -521,7 +532,7 @@ Contributions are welcome! Please follow these steps:
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/open-meteo-mcp.git
+git clone https://github.com/Achrefjr1997/open-meteo-mcp.git
 cd open-meteo-mcp
 
 # Create virtual environment

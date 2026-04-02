@@ -13,7 +13,6 @@ from .tools import forecast, historical, air_quality, geocoding, ensemble, marin
 from .resources import variables as variables_resources, models as models_resources
 from .prompts import weather_assistant
 
-
 # ==================== Server Configuration ====================
 
 SERVER_NAME = "open-meteo-mcp"

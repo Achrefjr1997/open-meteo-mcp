@@ -449,6 +449,10 @@ _WEATHER_CODES = {
     "85": {"description": "Slight snow showers", "icon": "🌨️", "category": "Snow Showers"},
     "86": {"description": "Heavy snow showers", "icon": "❄️", "category": "Snow Showers"},
     "95": {"description": "Thunderstorm", "icon": "⚡", "category": "Thunderstorm"},
-    "96": {"description": "Thunderstorm with slight hail", "icon": "⛈️", "category": "Thunderstorm"},
+    "96": {
+        "description": "Thunderstorm with slight hail",
+        "icon": "⛈️",
+        "category": "Thunderstorm",
+    },
     "99": {"description": "Thunderstorm with heavy hail", "icon": "⛈️", "category": "Thunderstorm"},
 }

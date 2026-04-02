@@ -6,11 +6,34 @@ rate limiting, and response parsing.
 """
 
 import asyncio
+import os
 from dataclasses import dataclass
 from typing import Any, Literal
 from enum import Enum
 
 import httpx
+
+# ==================== API Base URLs from Environment ====================
+
+DEFAULT_API_URLS = {
+    "OPEN_METEO_API_URL": "https://api.open-meteo.com",
+    "OPEN_METEO_AIR_QUALITY_API_URL": "https://air-quality-api.open-meteo.com",
+    "OPEN_METEO_MARINE_API_URL": "https://marine-api.open-meteo.com",
+    "OPEN_METEO_ARCHIVE_API_URL": "https://archive-api.open-meteo.com",
+    "OPEN_METEO_SEASONAL_API_URL": "https://seasonal-api.open-meteo.com",
+    "OPEN_METEO_ENSEMBLE_API_URL": "https://ensemble-api.open-meteo.com",
+    "OPEN_METEO_GEOCODING_API_URL": "https://geocoding-api.open-meteo.com",
+    "OPEN_METEO_FLOOD_API_URL": "https://flood-api.open-meteo.com",
+    "OPEN_METEO_CLIMATE_API_URL": "https://climate-api.open-meteo.com",
+}
+
+
+def get_api_url(key: str, default_path: str) -> str:
+    """Get API URL from environment or use default."""
+    base_url = os.environ.get(
+        key, DEFAULT_API_URLS.get(key, f"https://{default_path}.open-meteo.com")
+    )
+    return f"{base_url}/v1" if "/v1" not in base_url else base_url
 
 
 class APIEndpoint(Enum):
@@ -40,9 +63,33 @@ class APIEndpoint(Enum):
 class ClientConfig:
     """Configuration for Open-Meteo API client."""
 
-    # Base URLs
-    forecast_base_url: str = "https://api.open-meteo.com/v1"
-    geocoding_base_url: str = "https://geocoding-api.open-meteo.com/v1"
+    # Base URLs (from environment or defaults)
+    forecast_base_url: str = None  # type: ignore
+    geocoding_base_url: str = None  # type: ignore
+    air_quality_base_url: str = None  # type: ignore
+    marine_base_url: str = None  # type: ignore
+    ensemble_base_url: str = None  # type: ignore
+    climate_base_url: str = None  # type: ignore
+    archive_base_url: str = None  # type: ignore
+
+    def __post_init__(self):
+        """Initialize URLs from environment if not provided."""
+        if self.forecast_base_url is None:
+            self.forecast_base_url = get_api_url("OPEN_METEO_API_URL", "api")
+        if self.geocoding_base_url is None:
+            self.geocoding_base_url = get_api_url("OPEN_METEO_GEOCODING_API_URL", "geocoding-api")
+        if self.air_quality_base_url is None:
+            self.air_quality_base_url = get_api_url(
+                "OPEN_METEO_AIR_QUALITY_API_URL", "air-quality-api"
+            )
+        if self.marine_base_url is None:
+            self.marine_base_url = get_api_url("OPEN_METEO_MARINE_API_URL", "marine-api")
+        if self.ensemble_base_url is None:
+            self.ensemble_base_url = get_api_url("OPEN_METEO_ENSEMBLE_API_URL", "ensemble-api")
+        if self.climate_base_url is None:
+            self.climate_base_url = get_api_url("OPEN_METEO_CLIMATE_API_URL", "climate-api")
+        if self.archive_base_url is None:
+            self.archive_base_url = get_api_url("OPEN_METEO_ARCHIVE_API_URL", "archive-api")
 
     # Request settings
     timeout: float = 30.0
@@ -168,6 +215,30 @@ class OpenMeteoClient:
                 params[key] = str(value)
         return params
 
+    def _get_base_url_for_endpoint(self, endpoint: APIEndpoint) -> str:
+        """Get the appropriate base URL for an endpoint."""
+        endpoint_url_map = {
+            APIEndpoint.FORECAST: self.config.forecast_base_url,
+            APIEndpoint.HISTORICAL: self.config.forecast_base_url,
+            APIEndpoint.AIR_QUALITY: self.config.air_quality_base_url,
+            APIEndpoint.GEOCODING_SEARCH: self.config.geocoding_base_url,
+            APIEndpoint.GEOCODING_GET: self.config.geocoding_base_url,
+            APIEndpoint.ENSEMBLE: self.config.ensemble_base_url,
+            APIEndpoint.ECMWF: self.config.forecast_base_url,
+            APIEndpoint.GFS: self.config.forecast_base_url,
+            APIEndpoint.GFS_HRRR: self.config.forecast_base_url,
+            APIEndpoint.METEO_FRANCE: self.config.forecast_base_url,
+            APIEndpoint.DWD_ICON: self.config.forecast_base_url,
+            APIEndpoint.GEM: self.config.forecast_base_url,
+            APIEndpoint.JMA: self.config.forecast_base_url,
+            APIEndpoint.MET_NORWAY: self.config.forecast_base_url,
+            APIEndpoint.MARINE: self.config.marine_base_url,
+            APIEndpoint.CLIMATE: self.config.climate_base_url,
+            APIEndpoint.ELEVATION: self.config.forecast_base_url,
+            APIEndpoint.FLOOD: self.config.forecast_base_url,
+        }
+        return endpoint_url_map.get(endpoint, self.config.forecast_base_url)
+
     async def _request(
         self,
         endpoint: APIEndpoint,
@@ -175,11 +246,8 @@ class OpenMeteoClient:
         base_url: str | None = None,
     ) -> APIResponse:
         """Make API request with retry logic."""
-        # Determine base URL
-        if "geocoding" in endpoint.value:
-            url_base = self.config.geocoding_base_url
-        else:
-            url_base = self.config.forecast_base_url
+        # Determine base URL based on endpoint type
+        url_base = base_url or self._get_base_url_for_endpoint(endpoint)
 
         # Build URL
         endpoint_path = endpoint.value.replace("geocoding/", "")
@@ -389,7 +457,9 @@ class OpenMeteoClient:
             timeformat=timeformat or self.config.default_timeformat,
         )
 
-        return await self._request(APIEndpoint.AIR_QUALITY, params)
+        return await self._request(
+            APIEndpoint.AIR_QUALITY, params, base_url=self.config.air_quality_base_url
+        )
 
     # ==================== Geocoding API ====================
 
@@ -471,7 +541,9 @@ class OpenMeteoClient:
             cell_selection=cell_selection,
         )
 
-        return await self._request(APIEndpoint.ENSEMBLE, params)
+        return await self._request(
+            APIEndpoint.ENSEMBLE, params, base_url=self.config.ensemble_base_url
+        )
 
     # ==================== Model-Specific APIs ====================
 
@@ -578,7 +650,7 @@ class OpenMeteoClient:
             timeformat=timeformat or self.config.default_timeformat,
         )
 
-        return await self._request(APIEndpoint.MARINE, params)
+        return await self._request(APIEndpoint.MARINE, params, base_url=self.config.marine_base_url)
 
     async def get_elevation(
         self,
@@ -614,7 +686,9 @@ class OpenMeteoClient:
             timeformat=timeformat or self.config.default_timeformat,
         )
 
-        return await self._request(APIEndpoint.CLIMATE, params)
+        return await self._request(
+            APIEndpoint.CLIMATE, params, base_url=self.config.climate_base_url
+        )
 
 
 # Convenience function for quick client creation

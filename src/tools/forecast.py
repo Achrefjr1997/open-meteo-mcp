@@ -11,7 +11,6 @@ from mcp.server.fastmcp import FastMCP
 
 from ..client import OpenMeteoClient
 
-
 # ==================== Current Weather Tools ====================
 
 

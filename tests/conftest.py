@@ -12,7 +12,6 @@ from typing import AsyncGenerator
 from src.client import OpenMeteoClient, ClientConfig
 from src.server import create_app, create_client_from_env
 
-
 # ==================== Client Fixtures ====================
 
 

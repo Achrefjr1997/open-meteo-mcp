@@ -12,7 +12,6 @@ from mcp.server.fastmcp import FastMCP
 
 from src.resources import variables as variables_resources, models as models_resources
 
-
 # ==================== Resource Registration Tests ====================
 
 

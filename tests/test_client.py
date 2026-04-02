@@ -21,7 +21,6 @@ from src.client import (
     APIEndpoint,
 )
 
-
 # ==================== Client Configuration Tests ====================
 
 

@@ -30,7 +30,6 @@ from src.server import (
 )
 from src.client import OpenMeteoClient
 
-
 # ==================== Server Configuration Tests ====================
 
 
