@@ -4,6 +4,7 @@ Pytest Fixtures for Open-Meteo MCP Server Tests.
 Provides shared fixtures for client, server, and tool tests.
 """
 
+import asyncio
 import pytest
 import pytest_asyncio
 from typing import AsyncGenerator
