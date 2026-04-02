@@ -558,16 +558,7 @@ Weather data provided by Open-Meteo.com
 | **Open-Meteo API Docs** | https://open-meteo.com/en/docs |
 | **Open-Meteo GitHub** | https://github.com/open-meteo/open-meteo |
 | **MCP Specification** | https://modelcontextprotocol.io/ |
-| **This Project Issues** | [GitHub Issues](https://github.com/yourusername/open-meteo-mcp/issues) |
-
 ---
-
-## 🙏 Acknowledgments
-
-- **[Open-Meteo](https://open-meteo.com/)** - Providing free and open weather APIs
-- **[Model Context Protocol](https://modelcontextprotocol.io/)** - MCP specification
-- **Weather Data Providers**: ECMWF, NOAA, DWD, Météo-France, Met Norway, UK Met Office, ECCC, JMA, and others
-- **Community Contributors** - All who have contributed to this project
 
 
 **Built with ❤️ for weather enthusiasts and AI developers**
