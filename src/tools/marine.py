@@ -13,7 +13,7 @@ from ..client import OpenMeteoClient
 
 def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     """Register all marine and specialized tools with the MCP server."""
-    
+
     @mcp.tool()
     async def get_marine_forecast(
         latitude: float,
@@ -24,9 +24,9 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get marine weather forecast for ocean/coastal locations.
-        
+
         Provides wave, wind, and weather data for marine activities.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -49,7 +49,7 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 If None, returns common marine variables.
             forecast_days: Number of forecast days (1-16)
             timezone: Timezone for the response
-        
+
         Returns:
             Marine forecast data with wave and weather conditions
         """
@@ -70,7 +70,7 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "temperature_2m",
                 "weather_code",
             ]
-        
+
         response = await client.get_marine(
             latitude=latitude,
             longitude=longitude,
@@ -78,10 +78,10 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             forecast_days=forecast_days,
             timezone=timezone,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         return {
             "location": {
@@ -91,11 +91,9 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             },
             "hourly": data.get("hourly", {}),
             "forecast_days": forecast_days,
-            "marine_conditions_summary": _summarize_marine_conditions(
-                data.get("hourly", {})
-            ),
+            "marine_conditions_summary": _summarize_marine_conditions(data.get("hourly", {})),
         }
-    
+
     @mcp.tool()
     async def get_elevation(
         latitude: float,
@@ -103,13 +101,13 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get elevation data for coordinates.
-        
+
         Uses 90m digital elevation model (DEM) for accurate elevation data.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
-        
+
         Returns:
             Elevation in meters above sea level
         """
@@ -117,13 +115,13 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             latitude=latitude,
             longitude=longitude,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         elevation = data.get("elevation", 0)
-        
+
         return {
             "location": {
                 "latitude": latitude,
@@ -134,7 +132,7 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "elevation_ft": round(elevation * 3.28084, 1),
             "terrain_category": _get_terrain_category(elevation),
         }
-    
+
     @mcp.tool()
     async def get_climate_data(
         latitude: float,
@@ -146,10 +144,10 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get climate data for long-term weather patterns.
-        
+
         Climate data provides monthly averages and extremes over
         multi-decade periods (typically 30-year climate normals).
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -163,7 +161,7 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 sunshine_duration: Monthly sunshine duration
                 et0_fao_evapotranspiration: Monthly evapotranspiration
             timezone: Timezone for the response
-        
+
         Returns:
             Climate data with monthly averages and statistics
         """
@@ -175,7 +173,7 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "precipitation_sum",
                 "sunshine_duration",
             ]
-        
+
         response = await client.get_climate(
             latitude=latitude,
             longitude=longitude,
@@ -184,10 +182,10 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             daily=variables,
             timezone=timezone,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         return {
             "location": {
@@ -201,19 +199,19 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             },
             "daily": data.get("daily", {}),
         }
-    
+
     @mcp.tool()
     async def get_weather_code_explanation(
         weather_code: int,
     ) -> dict[str, str]:
         """
         Get human-readable explanation of WMO weather codes.
-        
+
         Weather codes (0-99) describe weather conditions.
-        
+
         Args:
             weather_code: WMO weather code (0-99)
-        
+
         Returns:
             Weather condition description and icon suggestion
         """
@@ -244,16 +242,27 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             85: {"description": "Slight snow showers", "icon": "🌨️", "category": "Snow Showers"},
             86: {"description": "Heavy snow showers", "icon": "❄️", "category": "Snow Showers"},
             95: {"description": "Thunderstorm", "icon": "⚡", "category": "Thunderstorm"},
-            96: {"description": "Thunderstorm with slight hail", "icon": "⛈️", "category": "Thunderstorm"},
-            99: {"description": "Thunderstorm with heavy hail", "icon": "⛈️", "category": "Thunderstorm"},
+            96: {
+                "description": "Thunderstorm with slight hail",
+                "icon": "⛈️",
+                "category": "Thunderstorm",
+            },
+            99: {
+                "description": "Thunderstorm with heavy hail",
+                "icon": "⛈️",
+                "category": "Thunderstorm",
+            },
         }
-        
-        code_info = weather_codes.get(weather_code, {
-            "description": "Unknown weather code",
-            "icon": "❓",
-            "category": "Unknown",
-        })
-        
+
+        code_info = weather_codes.get(
+            weather_code,
+            {
+                "description": "Unknown weather code",
+                "icon": "❓",
+                "category": "Unknown",
+            },
+        )
+
         return {
             "weather_code": weather_code,
             **code_info,
@@ -262,16 +271,17 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
 
 # ==================== Helper Functions ====================
 
+
 def _summarize_marine_conditions(hourly: dict) -> dict[str, Any]:
     """Summarize marine conditions from hourly data."""
     if not hourly:
         return {}
-    
+
     wave_height = hourly.get("wave_height", [])
     wind_speed = hourly.get("wind_speed_10m", [])
-    
+
     summary = {}
-    
+
     if wave_height:
         max_wave = max(wave_height)
         avg_wave = sum(wave_height) / len(wave_height)
@@ -280,14 +290,14 @@ def _summarize_marine_conditions(hourly: dict) -> dict[str, Any]:
             "avg_height_m": round(avg_wave, 2),
             "condition": _get_wave_condition(max_wave),
         }
-    
+
     if wind_speed:
         max_wind = max(wind_speed)
         summary["wind"] = {
             "max_speed": max_wind,
             "condition": _get_wind_condition(max_wind),
         }
-    
+
     return summary
 
 

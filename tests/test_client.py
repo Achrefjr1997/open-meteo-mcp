@@ -24,13 +24,14 @@ from src.client import (
 
 # ==================== Client Configuration Tests ====================
 
+
 class TestClientConfig:
     """Tests for ClientConfig dataclass."""
 
     def test_default_config(self):
         """Test default configuration values."""
         config = ClientConfig()
-        
+
         assert config.forecast_base_url == "https://api.open-meteo.com/v1"
         assert config.geocoding_base_url == "https://geocoding-api.open-meteo.com/v1"
         assert config.timeout == 30.0
@@ -51,7 +52,7 @@ class TestClientConfig:
             api_key="test_key",
             default_timezone="Europe/London",
         )
-        
+
         assert config.timeout == 60.0
         assert config.max_retries == 5
         assert config.retry_delay == 2.0
@@ -61,6 +62,7 @@ class TestClientConfig:
 
 
 # ==================== Coordinate Validation Tests ====================
+
 
 class TestCoordinateValidation:
     """Tests for coordinate validation."""
@@ -101,6 +103,7 @@ class TestCoordinateValidation:
 
 # ==================== Parameter Building Tests ====================
 
+
 class TestParameterBuilding:
     """Tests for parameter building utility."""
 
@@ -112,7 +115,7 @@ class TestParameterBuilding:
             timezone="GMT",
             elevation=None,
         )
-        
+
         assert "latitude" in params
         assert "longitude" not in params
         assert "timezone" in params
@@ -123,7 +126,7 @@ class TestParameterBuilding:
         params = OpenMeteoClient._build_params(
             variables=["temp", "humidity", "wind"],
         )
-        
+
         assert params["variables"] == "temp,humidity,wind"
 
     def test_boolean_conversion(self):
@@ -132,7 +135,7 @@ class TestParameterBuilding:
             flag=True,
             another_flag=False,
         )
-        
+
         assert params["flag"] == "true"
         assert params["another_flag"] == "false"
 
@@ -145,7 +148,7 @@ class TestParameterBuilding:
             count=10,
             timezone=None,
         )
-        
+
         assert params["latitude"] == "51.5074"
         assert params["variables"] == "temp,humidity"
         assert params["flag"] == "true"
@@ -154,6 +157,7 @@ class TestParameterBuilding:
 
 
 # ==================== API Response Tests ====================
+
 
 class TestAPIResponse:
     """Tests for APIResponse dataclass."""
@@ -168,7 +172,7 @@ class TestAPIResponse:
             elapsed_ms=150.5,
             success=True,
         )
-        
+
         assert response.success is True
         assert response.error_message is None
         assert response.data["temperature"] == 20.5
@@ -184,12 +188,13 @@ class TestAPIResponse:
             success=False,
             error_message="Invalid coordinates",
         )
-        
+
         assert response.success is False
         assert response.error_message == "Invalid coordinates"
 
 
 # ==================== Client Lifecycle Tests ====================
+
 
 class TestClientLifecycle:
     """Tests for client lifecycle management."""
@@ -200,7 +205,7 @@ class TestClientLifecycle:
         async with OpenMeteoClient(client_config) as client:
             assert isinstance(client, OpenMeteoClient)
             assert client._client is None  # Not created yet
-        
+
         # Client should be closed after context exit
 
     @pytest.mark.asyncio
@@ -213,20 +218,23 @@ class TestClientLifecycle:
 
 # ==================== Forecast API Tests (Real API Calls) ====================
 
+
 class TestForecastAPI:
     """Tests for Forecast API endpoints (makes real API calls)."""
 
     @pytest.mark.asyncio
-    async def test_get_current_weather(self, client: OpenMeteoClient, london_coordinates: tuple[float, float]):
+    async def test_get_current_weather(
+        self, client: OpenMeteoClient, london_coordinates: tuple[float, float]
+    ):
         """Test current weather forecast."""
         lat, lon = london_coordinates
-        
+
         response = await client.get_forecast(
             latitude=lat,
             longitude=lon,
             current=["temperature_2m", "weather_code", "wind_speed_10m"],
         )
-        
+
         assert response.success is True
         assert response.status_code == 200
         assert "current" in response.data
@@ -235,42 +243,48 @@ class TestForecastAPI:
         assert abs(response.data["latitude"] - lat) < 0.1
 
     @pytest.mark.asyncio
-    async def test_get_hourly_forecast(self, client: OpenMeteoClient, london_coordinates: tuple[float, float]):
+    async def test_get_hourly_forecast(
+        self, client: OpenMeteoClient, london_coordinates: tuple[float, float]
+    ):
         """Test hourly forecast."""
         lat, lon = london_coordinates
-        
+
         response = await client.get_forecast(
             latitude=lat,
             longitude=lon,
             hourly=["temperature_2m", "precipitation"],
             forecast_days=1,
         )
-        
+
         assert response.success is True
         assert "hourly" in response.data
         assert "time" in response.data["hourly"]
 
     @pytest.mark.asyncio
-    async def test_get_daily_forecast(self, client: OpenMeteoClient, london_coordinates: tuple[float, float]):
+    async def test_get_daily_forecast(
+        self, client: OpenMeteoClient, london_coordinates: tuple[float, float]
+    ):
         """Test daily forecast."""
         lat, lon = london_coordinates
-        
+
         response = await client.get_forecast(
             latitude=lat,
             longitude=lon,
             daily=["temperature_2m_max", "temperature_2m_min", "sunrise", "sunset"],
             forecast_days=7,
         )
-        
+
         assert response.success is True
         assert "daily" in response.data
         assert len(response.data["daily"]["time"]) == 7
 
     @pytest.mark.asyncio
-    async def test_forecast_with_units(self, client: OpenMeteoClient, london_coordinates: tuple[float, float]):
+    async def test_forecast_with_units(
+        self, client: OpenMeteoClient, london_coordinates: tuple[float, float]
+    ):
         """Test forecast with unit conversion."""
         lat, lon = london_coordinates
-        
+
         response = await client.get_forecast(
             latitude=lat,
             longitude=lon,
@@ -278,20 +292,23 @@ class TestForecastAPI:
             temperature_unit="fahrenheit",
             wind_speed_unit="mph",
         )
-        
+
         assert response.success is True
 
 
 # ==================== Historical API Tests (Real API Calls) ====================
 
+
 class TestHistoricalAPI:
     """Tests for Historical Weather API endpoints."""
 
     @pytest.mark.asyncio
-    async def test_get_historical_weather(self, client: OpenMeteoClient, london_coordinates: tuple[float, float]):
+    async def test_get_historical_weather(
+        self, client: OpenMeteoClient, london_coordinates: tuple[float, float]
+    ):
         """Test historical weather data retrieval."""
         lat, lon = london_coordinates
-        
+
         # Note: Historical API may require specific endpoint configuration
         # This test verifies the client can make the request
         try:
@@ -311,14 +328,17 @@ class TestHistoricalAPI:
 
 # ==================== Air Quality API Tests ====================
 
+
 class TestAirQualityAPI:
     """Tests for Air Quality API endpoints."""
 
     @pytest.mark.asyncio
-    async def test_get_air_quality(self, client: OpenMeteoClient, london_coordinates: tuple[float, float]):
+    async def test_get_air_quality(
+        self, client: OpenMeteoClient, london_coordinates: tuple[float, float]
+    ):
         """Test air quality data retrieval."""
         lat, lon = london_coordinates
-        
+
         try:
             response = await client.get_air_quality(
                 latitude=lat,
@@ -333,6 +353,7 @@ class TestAirQualityAPI:
 
 # ==================== Geocoding API Tests ====================
 
+
 class TestGeocodingAPI:
     """Tests for Geocoding API endpoints."""
 
@@ -343,7 +364,7 @@ class TestGeocodingAPI:
             name="London",
             count=5,
         )
-        
+
         assert response.success is True
         assert "results" in response.data
         assert len(response.data["results"]) > 0
@@ -356,7 +377,7 @@ class TestGeocodingAPI:
             country_code="FR",
             count=3,
         )
-        
+
         assert response.success is True
         assert len(response.data["results"]) > 0
 
@@ -366,14 +387,15 @@ class TestGeocodingAPI:
         # First search to get an ID
         search_response = await client.search_location(name="London", count=1)
         location_id = search_response.data["results"][0]["id"]
-        
+
         response = await client.get_location_by_id(location_id=location_id)
-        
+
         assert response.success is True
         assert "id" in response.data
 
 
 # ==================== Marine API Tests ====================
+
 
 class TestMarineAPI:
     """Tests for Marine Weather API endpoints."""
@@ -383,7 +405,7 @@ class TestMarineAPI:
         """Test marine weather forecast."""
         # Ocean coordinates near San Francisco
         lat, lon = 37.8, -122.5
-        
+
         try:
             response = await client.get_marine(
                 latitude=lat,
@@ -399,14 +421,17 @@ class TestMarineAPI:
 
 # ==================== Elevation API Tests ====================
 
+
 class TestElevationAPI:
     """Tests for Elevation API endpoint."""
 
     @pytest.mark.asyncio
-    async def test_get_elevation(self, client: OpenMeteoClient, london_coordinates: tuple[float, float]):
+    async def test_get_elevation(
+        self, client: OpenMeteoClient, london_coordinates: tuple[float, float]
+    ):
         """Test elevation data retrieval."""
         lat, lon = london_coordinates
-        
+
         try:
             response = await client.get_elevation(
                 latitude=lat,
@@ -420,53 +445,61 @@ class TestElevationAPI:
 
 # ==================== Model-Specific API Tests ====================
 
+
 class TestModelSpecificAPI:
     """Tests for model-specific forecast endpoints."""
 
     @pytest.mark.asyncio
-    async def test_get_ecmwf_forecast(self, client: OpenMeteoClient, london_coordinates: tuple[float, float]):
+    async def test_get_ecmwf_forecast(
+        self, client: OpenMeteoClient, london_coordinates: tuple[float, float]
+    ):
         """Test ECMWF model forecast."""
         lat, lon = london_coordinates
-        
+
         response = await client.get_ecmwf(
             latitude=lat,
             longitude=lon,
             hourly=["temperature_2m"],
             forecast_days=1,
         )
-        
+
         assert response.success is True
 
     @pytest.mark.asyncio
-    async def test_get_gfs_forecast(self, client: OpenMeteoClient, new_york_coordinates: tuple[float, float]):
+    async def test_get_gfs_forecast(
+        self, client: OpenMeteoClient, new_york_coordinates: tuple[float, float]
+    ):
         """Test GFS model forecast."""
         lat, lon = new_york_coordinates
-        
+
         response = await client.get_gfs(
             latitude=lat,
             longitude=lon,
             hourly=["temperature_2m"],
             forecast_days=1,
         )
-        
+
         assert response.success is True
 
     @pytest.mark.asyncio
-    async def test_get_metno_forecast(self, client: OpenMeteoClient, oslo_coordinates: tuple[float, float] = (59.9139, 10.7522)):
+    async def test_get_metno_forecast(
+        self, client: OpenMeteoClient, oslo_coordinates: tuple[float, float] = (59.9139, 10.7522)
+    ):
         """Test Met Norway model forecast."""
         lat, lon = oslo_coordinates
-        
+
         response = await client.get_met_norway(
             latitude=lat,
             longitude=lon,
             hourly=["temperature_2m"],
             forecast_days=1,
         )
-        
+
         assert response.success is True
 
 
 # ==================== Error Handling Tests ====================
+
 
 class TestErrorHandling:
     """Tests for error handling."""
@@ -505,19 +538,20 @@ class TestErrorHandling:
 
 # ==================== Convenience Function Tests ====================
 
+
 class TestConvenienceFunctions:
     """Tests for convenience functions."""
 
     def test_create_client(self):
         """Test create_client convenience function."""
         from src.client import create_client
-        
+
         client = create_client(
             api_key="test_key",
             timeout=60.0,
             timezone="Europe/London",
         )
-        
+
         assert isinstance(client, OpenMeteoClient)
         assert client.config.api_key == "test_key"
         assert client.config.timeout == 60.0
@@ -525,6 +559,7 @@ class TestConvenienceFunctions:
 
 
 # ==================== API Endpoint Enum Tests ====================
+
 
 class TestAPIEndpoint:
     """Tests for APIEndpoint enum."""
@@ -551,6 +586,6 @@ class TestAPIEndpoint:
             "ELEVATION",
             "FLOOD",
         ]
-        
+
         for endpoint_name in expected_endpoints:
             assert hasattr(APIEndpoint, endpoint_name)

@@ -15,6 +15,7 @@ from src.server import create_app, create_client_from_env
 
 # ==================== Client Fixtures ====================
 
+
 @pytest.fixture
 def client_config() -> ClientConfig:
     """Create a test client configuration."""
@@ -49,6 +50,7 @@ async def client_with_api_defaults() -> AsyncGenerator[OpenMeteoClient, None]:
 
 # ==================== Server Fixtures ====================
 
+
 @pytest.fixture
 def mcp_server():
     """Create an MCP server instance."""
@@ -56,6 +58,7 @@ def mcp_server():
 
 
 # ==================== Coordinate Fixtures ====================
+
 
 @pytest.fixture
 def london_coordinates() -> tuple[float, float]:
@@ -95,6 +98,7 @@ def invalid_coordinates() -> tuple[float, float]:
 
 # ==================== Date Fixtures ====================
 
+
 @pytest.fixture
 def sample_date_range() -> tuple[str, str]:
     """Sample date range for historical tests."""
@@ -108,6 +112,7 @@ def sample_single_date() -> str:
 
 
 # ==================== Weather Variable Fixtures ====================
+
 
 @pytest.fixture
 def common_weather_variables() -> list[str]:
@@ -173,6 +178,7 @@ def marine_variables() -> list[str]:
 
 # ==================== Helper Fixtures ====================
 
+
 @pytest.fixture
 def sample_location_name() -> str:
     """Sample location name for geocoding tests."""
@@ -192,6 +198,7 @@ def sample_location_id() -> int:
 
 
 # ==================== Async Test Helpers ====================
+
 
 @pytest.fixture
 def event_loop():

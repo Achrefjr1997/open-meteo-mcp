@@ -14,7 +14,7 @@ from ..client import OpenMeteoClient
 
 def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     """Register all air quality tools with the MCP server."""
-    
+
     @mcp.tool()
     async def get_current_air_quality(
         latitude: float,
@@ -25,11 +25,11 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get current air quality conditions.
-        
+
         Data sources:
         - CAMS European Air Quality Forecast (Europe, 11km resolution)
         - CAMS Global Atmospheric Composition Forecasts (Global, 45km resolution)
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -51,7 +51,7 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 - "cams_europe": European domain only
                 - "cams_global": Global domain only
             timezone: Timezone for the response
-        
+
         Returns:
             Current air quality data with variable values and AQI interpretations
         """
@@ -68,7 +68,7 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "us_aqi_pm2_5",
                 "us_aqi_pm10",
             ]
-        
+
         response = await client.get_air_quality(
             latitude=latitude,
             longitude=longitude,
@@ -76,13 +76,13 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             domains=domains,
             timezone=timezone,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         current = data.get("current", {})
-        
+
         result = {
             "location": {
                 "latitude": data.get("latitude"),
@@ -92,9 +92,9 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "current": current,
             "aqi_interpretation": _interpret_aqi(current),
         }
-        
+
         return result
-    
+
     @mcp.tool()
     async def get_hourly_air_quality(
         latitude: float,
@@ -107,7 +107,7 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get hourly air quality forecast and historical data.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -116,7 +116,7 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             past_days: Number of past days to include (0-92, default 0)
             domains: Data domain selection ("auto", "cams_europe", "cams_global")
             timezone: Timezone for the response
-        
+
         Returns:
             Hourly air quality data with timestamps
         """
@@ -129,7 +129,7 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "european_aqi_pm2_5",
                 "us_aqi_pm2_5",
             ]
-        
+
         response = await client.get_air_quality(
             latitude=latitude,
             longitude=longitude,
@@ -139,10 +139,10 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             domains=domains,
             timezone=timezone,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         return {
             "location": {
@@ -156,7 +156,7 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "past_days": past_days,
             },
         }
-    
+
     @mcp.tool()
     async def get_air_quality_index(
         latitude: float,
@@ -166,7 +166,7 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get air quality index with health recommendations.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -174,7 +174,7 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 - "european": European Air Quality Index
                 - "us": US Air Quality Index (EPA)
             timezone: Timezone for the response
-        
+
         Returns:
             AQI values with category, health implications, and recommendations
         """
@@ -195,24 +195,24 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "us_aqi_o3",
                 "us_aqi_so2",
             ]
-        
+
         response = await client.get_air_quality(
             latitude=latitude,
             longitude=longitude,
             current=variables,
             timezone=timezone,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         current = data.get("current", {})
-        
+
         # Get the overall AQI (maximum of all sub-indices)
         aqi_values = [v for v in current.values() if isinstance(v, (int, float))]
         overall_aqi = max(aqi_values) if aqi_values else None
-        
+
         result = {
             "location": {
                 "latitude": data.get("latitude"),
@@ -224,9 +224,9 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "pollutants": current,
             "health_recommendations": _get_health_recommendations(overall_aqi, standard),
         }
-        
+
         return result
-    
+
     @mcp.tool()
     async def get_pollen_forecast(
         latitude: float,
@@ -236,15 +236,15 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get pollen forecast for allergy sufferers.
-        
+
         Note: Pollen data is only available for Europe during pollen season.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
             days: Number of forecast days (1-5)
             timezone: Timezone for the response
-        
+
         Returns:
             Pollen forecast with concentration levels for different pollen types
         """
@@ -256,7 +256,7 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "olive_pollen",
             "ragweed_pollen",
         ]
-        
+
         response = await client.get_air_quality(
             latitude=latitude,
             longitude=longitude,
@@ -264,13 +264,13 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             forecast_days=days,
             timezone=timezone,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         hourly = data.get("hourly", {})
-        
+
         # Check if pollen data is available
         has_pollen = any(k.endswith("_pollen") for k in hourly.keys())
         if not has_pollen:
@@ -280,20 +280,18 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                     "longitude": data.get("longitude"),
                 },
                 "message": "Pollen data not available for this location. "
-                          "Pollen forecasts are only available for Europe during pollen season.",
+                "Pollen forecasts are only available for Europe during pollen season.",
             }
-        
+
         return {
             "location": {
                 "latitude": data.get("latitude"),
                 "longitude": data.get("longitude"),
             },
             "hourly": hourly,
-            "pollen_types": [
-                "alder", "birch", "grass", "mugwort", "olive", "ragweed"
-            ],
+            "pollen_types": ["alder", "birch", "grass", "mugwort", "olive", "ragweed"],
         }
-    
+
     @mcp.tool()
     async def get_uv_index_forecast(
         latitude: float,
@@ -303,18 +301,18 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get UV index forecast with safety recommendations.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
             days: Number of forecast days (1-7)
             timezone: Timezone for the response
-        
+
         Returns:
             UV index forecast with risk levels and safety recommendations
         """
         variables = ["uv_index", "uv_index_clear_sky"]
-        
+
         response = await client.get_air_quality(
             latitude=latitude,
             longitude=longitude,
@@ -322,17 +320,17 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             forecast_days=days,
             timezone=timezone,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         hourly = data.get("hourly", {})
-        
+
         # Extract daily max UV index
         time = hourly.get("time", [])
         uv_index = hourly.get("uv_index", [])
-        
+
         daily_max_uv = {}
         for i, t in enumerate(time):
             if i < len(uv_index):
@@ -340,7 +338,7 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 if day not in daily_max_uv:
                     daily_max_uv[day] = 0
                 daily_max_uv[day] = max(daily_max_uv[day], uv_index[i])
-        
+
         result = {
             "location": {
                 "latitude": data.get("latitude"),
@@ -348,20 +346,19 @@ def register_air_quality_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             },
             "hourly": hourly,
             "daily_max_uv": daily_max_uv,
-            "uv_risk_levels": {
-                day: _get_uv_risk_level(uv) for day, uv in daily_max_uv.items()
-            },
+            "uv_risk_levels": {day: _get_uv_risk_level(uv) for day, uv in daily_max_uv.items()},
         }
-        
+
         return result
 
 
 # ==================== Helper Functions ====================
 
+
 def _interpret_aqi(current: dict) -> dict[str, str]:
     """Interpret AQI values and provide health guidance."""
     interpretation = {}
-    
+
     # European AQI interpretation
     eu_aqi = current.get("european_aqi_pm2_5") or current.get("european_aqi_pm10")
     if eu_aqi:
@@ -370,14 +367,16 @@ def _interpret_aqi(current: dict) -> dict[str, str]:
         elif eu_aqi <= 40:
             interpretation["european"] = "Fair - Acceptable air quality"
         elif eu_aqi <= 60:
-            interpretation["european"] = "Moderate - Sensitive individuals should limit outdoor activity"
+            interpretation["european"] = (
+                "Moderate - Sensitive individuals should limit outdoor activity"
+            )
         elif eu_aqi <= 80:
             interpretation["european"] = "Poor - Health effects for sensitive groups"
         elif eu_aqi <= 100:
             interpretation["european"] = "Very Poor - Health warnings for everyone"
         else:
             interpretation["european"] = "Extremely Poor - Emergency conditions"
-    
+
     # US AQI interpretation
     us_aqi = current.get("us_aqi_pm2_5") or current.get("us_aqi_pm10")
     if us_aqi:
@@ -393,7 +392,7 @@ def _interpret_aqi(current: dict) -> dict[str, str]:
             interpretation["us"] = "Very Unhealthy - Health alert"
         else:
             interpretation["us"] = "Hazardous - Emergency conditions"
-    
+
     return interpretation
 
 
@@ -401,9 +400,9 @@ def _get_aqi_category(aqi: int | float | None, standard: str) -> str:
     """Get AQI category name based on value and standard."""
     if aqi is None:
         return "Unknown"
-    
+
     aqi = int(aqi)
-    
+
     if standard.lower() == "european":
         if aqi <= 20:
             return "Good"
@@ -436,9 +435,9 @@ def _get_health_recommendations(aqi: int | float | None, standard: str) -> dict[
     """Get health recommendations based on AQI."""
     if aqi is None:
         return {"general": "No data available"}
-    
+
     aqi = int(aqi)
-    
+
     if standard.lower() == "european":
         if aqi <= 20:
             return {

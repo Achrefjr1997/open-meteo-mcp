@@ -10,12 +10,12 @@ from mcp.server.fastmcp import FastMCP
 
 def register_prompts(mcp: FastMCP) -> None:
     """Register all prompts with the MCP server."""
-    
+
     @mcp.prompt()
     def weather_analysis_prompt() -> str:
         """
         System prompt for weather analysis assistance.
-        
+
         This prompt guides the AI to use weather tools effectively
         and provide helpful, accurate weather information to users.
         """
@@ -116,12 +116,12 @@ When users ask about model accuracy or want to compare:
 - **Ensemble models**: Use for uncertainty and probability information
 
 Remember: Be helpful, accurate, and clear. Weather affects daily life significantly, so provide actionable information while being honest about uncertainties."""
-    
+
     @mcp.prompt()
     def marine_weather_prompt() -> str:
         """
         System prompt for marine weather analysis.
-        
+
         Specialized guidance for marine and coastal weather queries.
         """
         return """You are a marine weather specialist assistant. When users ask about marine conditions:
@@ -186,12 +186,12 @@ Remember: Be helpful, accurate, and clear. Weather affects daily life significan
 - Always check official marine warnings before heading out
 - This data doesn't replace official marine forecasts or warnings
 - Tidal currents and water levels not included - check tide tables separately"""
-    
+
     @mcp.prompt()
     def climate_analysis_prompt() -> str:
         """
         System prompt for climate data analysis.
-        
+
         Guidance for analyzing long-term climate patterns and trends.
         """
         return """You are a climate data analysis assistant. When users ask about climate or long-term weather patterns:
@@ -253,12 +253,12 @@ Remember: Be helpful, accurate, and clear. Weather affects daily life significan
 - Urban heat island effects may influence temperature trends
 - This data is for analysis/education; for policy decisions, use official climate datasets
 - Attribution of specific events to climate change requires formal attribution studies"""
-    
+
     @mcp.prompt()
     def air_quality_health_prompt() -> str:
         """
         System prompt for air quality and health guidance.
-        
+
         Specialized guidance for air quality queries with health recommendations.
         """
         return """You are an air quality and environmental health assistant. When users ask about air quality:

@@ -12,12 +12,12 @@ from mcp.server.fastmcp import FastMCP
 
 def register_model_resources(mcp: FastMCP) -> None:
     """Register all model-related resources with the MCP server."""
-    
+
     @mcp.resource("weather://models/all")
     def get_all_models() -> dict[str, Any]:
         """
         Get all available weather models with descriptions.
-        
+
         Returns complete list of weather models organized by provider.
         """
         return {
@@ -25,47 +25,47 @@ def register_model_resources(mcp: FastMCP) -> None:
             "providers": list(_PROVIDERS.keys()),
             "models": _MODELS,
         }
-    
+
     @mcp.resource("weather://models/ecmwf")
     def get_ecmwf_models() -> dict[str, Any]:
         """Get ECMWF (European Centre) weather models."""
         return _filter_by_provider("ECMWF")
-    
+
     @mcp.resource("weather://models/noaa")
     def get_noaa_models() -> dict[str, Any]:
         """Get NOAA (US) weather models."""
         return _filter_by_provider("NOAA")
-    
+
     @mcp.resource("weather://models/dwd")
     def get_dwd_models() -> dict[str, Any]:
         """Get DWD (German) weather models."""
         return _filter_by_provider("DWD")
-    
+
     @mcp.resource("weather://models/meteo_france")
     def get_meteo_france_models() -> dict[str, Any]:
         """Get Météo-France weather models."""
         return _filter_by_provider("Météo-France")
-    
+
     @mcp.resource("weather://models/ukmo")
     def get_ukmo_models() -> dict[str, Any]:
         """Get UK Met Office weather models."""
         return _filter_by_provider("UK Met Office")
-    
+
     @mcp.resource("weather://models/met_norway")
     def get_met_norway_models() -> dict[str, Any]:
         """Get Met Norway weather models."""
         return _filter_by_provider("Met Norway")
-    
+
     @mcp.resource("weather://models/eccc")
     def get_eccc_models() -> dict[str, Any]:
         """Get Environment Canada (ECCC) weather models."""
         return _filter_by_provider("ECCC")
-    
+
     @mcp.resource("weather://models/jma")
     def get_jma_models() -> dict[str, Any]:
         """Get JMA (Japan) weather models."""
         return _filter_by_provider("JMA")
-    
+
     @mcp.resource("weather://models/ensemble")
     def get_ensemble_models() -> dict[str, Any]:
         """Get ensemble forecast models."""
@@ -73,12 +73,12 @@ def register_model_resources(mcp: FastMCP) -> None:
             "description": "Ensemble models combine multiple forecasts for uncertainty estimation",
             "models": _filter_by_type("ensemble"),
         }
-    
+
     @mcp.resource("weather://models/comparison")
     def get_model_comparison() -> dict[str, Any]:
         """
         Compare weather models by resolution and coverage.
-        
+
         Useful for selecting the best model for a specific location.
         """
         comparison = {
@@ -102,7 +102,7 @@ def register_model_resources(mcp: FastMCP) -> None:
                 "marine": ["gfs_global", "ecmwf_ifs04", "wave_models"],
             },
         }
-        
+
         for model_id, info in _MODELS.items():
             res = info.get("resolution_km", 999)
             if res <= 3:
@@ -111,20 +111,20 @@ def register_model_resources(mcp: FastMCP) -> None:
                 comparison["by_resolution"]["high_resolution"].append(model_id)
             elif res <= 15:
                 comparison["by_resolution"]["medium_resolution"].append(model_id)
-            
+
             coverage = info.get("coverage", "global")
             if coverage == "global":
                 comparison["by_coverage"]["global"].append(model_id)
             elif "Europe" in coverage:
                 comparison["by_coverage"]["regional_europe"].append(model_id)
-        
+
         return comparison
-    
+
     @mcp.resource("weather://models/usage-guide")
     def get_models_usage_guide() -> dict[str, Any]:
         """
         Get guide for selecting and using weather models.
-        
+
         Includes model characteristics, best use cases, and selection tips.
         """
         return {
@@ -137,8 +137,8 @@ def register_model_resources(mcp: FastMCP) -> None:
                         "For North America: Use GFS-HRRR for short-term, GFS for extended",
                         "For global coverage: ECMWF IFS is generally most accurate",
                         "For ensemble/uncertainty: Use ICON-EPS or GFS-Ensemble",
-                        "For marine: Use GFS or ECMWF with marine variables"
-                    ]
+                        "For marine: Use GFS or ECMWF with marine variables",
+                    ],
                 },
                 "model_characteristics": {
                     "title": "Model Characteristics",
@@ -146,8 +146,8 @@ def register_model_resources(mcp: FastMCP) -> None:
                         "resolution": "Higher resolution = better local detail",
                         "update_frequency": "More frequent = more current forecasts",
                         "forecast_range": "Some models excel at short-term, others at extended",
-                        "ensemble": "Provides probability and uncertainty information"
-                    }
+                        "ensemble": "Provides probability and uncertainty information",
+                    },
                 },
                 "best_practices": {
                     "title": "Best Practices",
@@ -156,29 +156,23 @@ def register_model_resources(mcp: FastMCP) -> None:
                         "Compare multiple models for important decisions",
                         "Check ensemble spread for forecast confidence",
                         "Regional models outperform global models locally",
-                        "Update frequency matters for rapidly changing conditions"
-                    ]
-                }
-            }
+                        "Update frequency matters for rapidly changing conditions",
+                    ],
+                },
+            },
         }
 
 
 def _filter_by_provider(provider: str) -> dict[str, Any]:
     """Filter models by provider."""
     return {
-        model_id: info
-        for model_id, info in _MODELS.items()
-        if info.get("provider") == provider
+        model_id: info for model_id, info in _MODELS.items() if info.get("provider") == provider
     }
 
 
 def _filter_by_type(model_type: str) -> dict[str, Any]:
     """Filter models by type."""
-    return {
-        model_id: info
-        for model_id, info in _MODELS.items()
-        if info.get("type") == model_type
-    }
+    return {model_id: info for model_id, info in _MODELS.items() if info.get("type") == model_type}
 
 
 # ==================== Model Definitions ====================
@@ -248,7 +242,6 @@ _MODELS = {
         "type": "ensemble",
         "best_for": "AI-enhanced ensemble forecasting",
     },
-    
     # NOAA Models
     "gfs_global": {
         "provider": "NOAA",
@@ -294,7 +287,6 @@ _MODELS = {
         "type": "ensemble",
         "best_for": "Lower resolution ensemble forecasting",
     },
-    
     # DWD (German) Models
     "icon_global": {
         "provider": "DWD",
@@ -362,7 +354,6 @@ _MODELS = {
         "type": "ensemble",
         "best_for": "High-resolution ensemble for Germany",
     },
-    
     # Météo-France Models
     "meteofrance_seamless": {
         "provider": "Météo-France",
@@ -397,7 +388,6 @@ _MODELS = {
         "type": "deterministic",
         "best_for": "High-resolution forecasting for France",
     },
-    
     # UK Met Office Models
     "ukmo_global": {
         "provider": "UK Met Office",
@@ -432,7 +422,6 @@ _MODELS = {
         "type": "ensemble",
         "best_for": "Ensemble forecasting with UK focus",
     },
-    
     # Met Norway Models
     "metno_nordic": {
         "provider": "Met Norway",
@@ -456,7 +445,6 @@ _MODELS = {
         "type": "deterministic",
         "best_for": "Global forecasting with Arctic focus",
     },
-    
     # ECCC (Canada) Models
     "gem_global": {
         "provider": "ECCC",
@@ -491,7 +479,6 @@ _MODELS = {
         "type": "ensemble",
         "best_for": "Ensemble forecasting for North America",
     },
-    
     # JMA (Japan) Models
     "jma_msm": {
         "provider": "JMA",
@@ -515,7 +502,6 @@ _MODELS = {
         "type": "deterministic",
         "best_for": "Global forecasting with Asia focus",
     },
-    
     # Other Regional Models
     "kma_ldps": {
         "provider": "KMA",

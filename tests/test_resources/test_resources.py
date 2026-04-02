@@ -15,25 +15,27 @@ from src.resources import variables as variables_resources, models as models_res
 
 # ==================== Resource Registration Tests ====================
 
+
 class TestResourceRegistration:
     """Tests for resource registration with MCP server."""
 
     def test_register_variable_resources(self):
         """Test variable resources registration."""
         mcp = FastMCP(name="test")
-        
+
         # Should not raise
         variables_resources.register_variable_resources(mcp)
 
     def test_register_model_resources(self):
         """Test model resources registration."""
         mcp = FastMCP(name="test")
-        
+
         # Should not raise
         models_resources.register_model_resources(mcp)
 
 
 # ==================== Variable Resource Tests ====================
+
 
 class TestVariableResources:
     """Tests for weather variable resources."""
@@ -46,7 +48,7 @@ class TestVariableResources:
         """Test that variable categories are defined."""
         assert hasattr(variables_resources, "_CATEGORIES")
         assert hasattr(variables_resources, "_VARIABLES")
-        
+
         # Check categories exist
         categories = variables_resources._CATEGORIES
         assert "temperature" in categories
@@ -63,7 +65,7 @@ class TestVariableResources:
     def test_weather_codes_defined(self):
         """Test that weather codes are defined."""
         assert hasattr(variables_resources, "_WEATHER_CODES")
-        
+
         weather_codes = variables_resources._WEATHER_CODES
         assert "0" in weather_codes  # Clear sky
         assert "61" in weather_codes  # Rain
@@ -75,12 +77,12 @@ class TestVariableResources:
         temp_vars = variables_resources._filter_by_category("temperature")
         assert len(temp_vars) > 0
         assert "temperature_2m" in temp_vars
-        
+
         # Test wind category
         wind_vars = variables_resources._filter_by_category("wind")
         assert len(wind_vars) > 0
         assert "wind_speed_10m" in wind_vars
-        
+
         # Test air_quality category
         aq_vars = variables_resources._filter_by_category("air_quality")
         assert len(aq_vars) > 0
@@ -94,6 +96,7 @@ class TestVariableResources:
 
 # ==================== Model Resource Tests ====================
 
+
 class TestModelResources:
     """Tests for weather model resources."""
 
@@ -104,7 +107,7 @@ class TestModelResources:
     def test_model_providers_defined(self):
         """Test that model providers are defined."""
         assert hasattr(models_resources, "_PROVIDERS")
-        
+
         providers = models_resources._PROVIDERS
         assert "ECMWF" in providers
         assert "NOAA" in providers
@@ -118,7 +121,7 @@ class TestModelResources:
     def test_models_defined(self):
         """Test that weather models are defined."""
         assert hasattr(models_resources, "_MODELS")
-        
+
         models = models_resources._MODELS
         assert "ecmwf_ifs04" in models
         assert "gfs_global" in models
@@ -130,7 +133,7 @@ class TestModelResources:
         ecmwf_models = models_resources._filter_by_provider("ECMWF")
         assert len(ecmwf_models) > 0
         assert "ecmwf_ifs04" in ecmwf_models
-        
+
         # Test NOAA models
         noaa_models = models_resources._filter_by_provider("NOAA")
         assert len(noaa_models) > 0
@@ -149,13 +152,14 @@ class TestModelResources:
 
 # ==================== Resource Content Tests ====================
 
+
 class TestResourceContent:
     """Tests for resource content validation."""
 
     def test_variable_has_required_fields(self):
         """Test that variables have required fields."""
         variables = variables_resources._VARIABLES
-        
+
         for name, info in variables.items():
             assert "description" in info
             assert "category" in info
@@ -163,7 +167,7 @@ class TestResourceContent:
     def test_model_has_required_fields(self):
         """Test that models have required fields."""
         models = models_resources._MODELS
-        
+
         for model_id, info in models.items():
             assert "provider" in info
             assert "name" in info
@@ -174,26 +178,27 @@ class TestResourceContent:
 
 # ==================== Resource Integration Tests ====================
 
+
 class TestResourceIntegration:
     """Integration tests for resources."""
 
     def test_all_resources_register_on_server(self):
         """Test that all resources register correctly on a server."""
         mcp = FastMCP(name="test-resources")
-        
+
         # Register all resources
         variables_resources.register_variable_resources(mcp)
         models_resources.register_model_resources(mcp)
-        
+
         # Should complete without errors
 
     def test_resources_use_fastmcp_resource_decorator(self):
         """Test that resources use the FastMCP resource decorator."""
         import inspect
-        
+
         var_source = inspect.getsource(variables_resources)
         model_source = inspect.getsource(models_resources)
-        
+
         # Should use @mcp.resource() decorator
         assert "@mcp.resource" in var_source
         assert "@mcp.resource" in model_source
@@ -201,27 +206,30 @@ class TestResourceIntegration:
 
 # ==================== Resource URI Pattern Tests ====================
 
+
 class TestResourceURIPatterns:
     """Tests for resource URI patterns."""
 
     def test_variable_uri_pattern(self):
         """Test variable resource URI pattern."""
         import inspect
+
         source = inspect.getsource(variables_resources)
-        
+
         # Check for URI patterns
-        assert 'weather://variables/all' in source
-        assert 'weather://variables/temperature' in source
-        assert 'weather://variables/wind' in source
-        assert 'weather://variables/precipitation' in source
+        assert "weather://variables/all" in source
+        assert "weather://variables/temperature" in source
+        assert "weather://variables/wind" in source
+        assert "weather://variables/precipitation" in source
 
     def test_model_uri_pattern(self):
         """Test model resource URI pattern."""
         import inspect
+
         source = inspect.getsource(models_resources)
-        
+
         # Check for URI patterns
-        assert 'weather://models/all' in source
-        assert 'weather://models/ecmwf' in source
-        assert 'weather://models/noaa' in source
-        assert 'weather://models/dwd' in source
+        assert "weather://models/all" in source
+        assert "weather://models/ecmwf" in source
+        assert "weather://models/noaa" in source
+        assert "weather://models/dwd" in source

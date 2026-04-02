@@ -80,19 +80,20 @@ def create_app() -> FastMCP:
     """Create the complete MCP application."""
     # Create server
     mcp = create_mcp_server()
-    
+
     # Create client
     client = create_client_from_env()
-    
+
     # Register all components
     register_all_tools(mcp, client)
     register_all_resources(mcp)
     register_all_prompts(mcp)
-    
+
     return mcp
 
 
 # ==================== Main Entry Point ====================
+
 
 def main() -> None:
     """Main entry point for the MCP server."""
@@ -109,6 +110,7 @@ def run_stdio() -> None:
 def run_sse(host: str = "0.0.0.0", port: int = 8000) -> None:
     """Run the server with SSE transport for remote access using uvicorn."""
     import uvicorn
+
     mcp = create_app()
     # Get the SSE Starlette app from FastMCP
     app = mcp.sse_app()
@@ -119,7 +121,7 @@ def run_sse(host: str = "0.0.0.0", port: int = 8000) -> None:
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(
         description="Open-Meteo MCP Server",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -140,29 +142,24 @@ Examples:
   # Set API key for commercial use
   export OPEN_METEO_API_KEY=your_api_key
   python -m src.server
-        """
+        """,
     )
-    
+
     parser.add_argument(
         "--transport",
         choices=["stdio", "sse"],
         default="stdio",
-        help="Transport protocol (default: stdio)"
+        help="Transport protocol (default: stdio)",
     )
-    
+
     parser.add_argument(
-        "--host",
-        default="0.0.0.0",
-        help="Host for SSE transport (default: 0.0.0.0)"
+        "--host", default="0.0.0.0", help="Host for SSE transport (default: 0.0.0.0)"
     )
-    
+
     parser.add_argument(
-        "--port",
-        type=int,
-        default=8000,
-        help="Port for SSE transport (default: 8000)"
+        "--port", type=int, default=8000, help="Port for SSE transport (default: 8000)"
     )
-    
+
     args = parser.parse_args()
 
     if args.transport == "stdio":

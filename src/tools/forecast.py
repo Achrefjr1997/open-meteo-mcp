@@ -14,9 +14,10 @@ from ..client import OpenMeteoClient
 
 # ==================== Current Weather Tools ====================
 
+
 def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     """Register all forecast-related tools with the MCP server."""
-    
+
     @mcp.tool()
     async def get_current_weather(
         latitude: float,
@@ -28,7 +29,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get current weather conditions for a location.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -48,7 +49,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             timezone: Timezone for the response (e.g., "auto", "Europe/Berlin")
             temperature_unit: "celsius" or "fahrenheit"
             wind_speed_unit: "kmh", "ms", "mph", or "kn"
-        
+
         Returns:
             Current weather data including time and requested variables
         """
@@ -64,7 +65,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "cloud_cover",
                 "precipitation",
             ]
-        
+
         response = await client.get_forecast(
             latitude=latitude,
             longitude=longitude,
@@ -73,10 +74,10 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             temperature_unit=temperature_unit,
             wind_speed_unit=wind_speed_unit,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         result = {
             "location": {
@@ -87,9 +88,9 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             },
             "current": data.get("current", {}),
         }
-        
+
         return result
-    
+
     @mcp.tool()
     async def get_hourly_forecast(
         latitude: float,
@@ -103,7 +104,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get hourly weather forecast for a location.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -123,7 +124,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             temperature_unit: "celsius" or "fahrenheit"
             wind_speed_unit: "kmh", "ms", "mph", or "kn"
             precipitation_unit: "mm" or "inch"
-        
+
         Returns:
             Hourly forecast data with timestamps and variable values
         """
@@ -139,7 +140,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "cloud_cover",
                 "pressure_msl",
             ]
-        
+
         response = await client.get_forecast(
             latitude=latitude,
             longitude=longitude,
@@ -150,10 +151,10 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             wind_speed_unit=wind_speed_unit,
             precipitation_unit=precipitation_unit,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         return {
             "location": {
@@ -165,7 +166,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "hourly": data.get("hourly", {}),
             "forecast_days": forecast_days,
         }
-    
+
     @mcp.tool()
     async def get_daily_forecast(
         latitude: float,
@@ -179,7 +180,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get daily weather forecast for a location.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -203,7 +204,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             temperature_unit: "celsius" or "fahrenheit"
             wind_speed_unit: "kmh", "ms", "mph", or "kn"
             precipitation_unit: "mm" or "inch"
-        
+
         Returns:
             Daily forecast data with dates and aggregated values
         """
@@ -224,7 +225,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "wind_gusts_10m_max",
                 "weather_code",
             ]
-        
+
         response = await client.get_forecast(
             latitude=latitude,
             longitude=longitude,
@@ -235,10 +236,10 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             wind_speed_unit=wind_speed_unit,
             precipitation_unit=precipitation_unit,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         return {
             "location": {
@@ -250,7 +251,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "daily": data.get("daily", {}),
             "forecast_days": forecast_days,
         }
-    
+
     @mcp.tool()
     async def get_15min_forecast(
         latitude: float,
@@ -263,10 +264,10 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get 15-minute interval weather forecast.
-        
+
         Available for Central Europe and North America with high resolution.
         Other locations receive interpolated data.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -279,7 +280,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             timezone: Timezone for the response
             temperature_unit: "celsius" or "fahrenheit"
             wind_speed_unit: "kmh", "ms", "mph", or "kn"
-        
+
         Returns:
             15-minute interval forecast data
         """
@@ -295,7 +296,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "rain",
                 "precipitation_probability",
             ]
-        
+
         response = await client.get_forecast(
             latitude=latitude,
             longitude=longitude,
@@ -305,10 +306,10 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             temperature_unit=temperature_unit,
             wind_speed_unit=wind_speed_unit,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         return {
             "location": {
@@ -320,7 +321,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "minutely_15": data.get("minutely_15", {}),
             "forecast_days": forecast_days,
         }
-    
+
     @mcp.tool()
     async def get_complete_forecast(
         latitude: float,
@@ -333,10 +334,10 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get complete weather forecast with current, hourly, and daily data.
-        
+
         This is a convenience tool that retrieves all common weather variables
         in a single request.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -345,7 +346,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             temperature_unit: "celsius" or "fahrenheit"
             wind_speed_unit: "kmh", "ms", "mph", or "kn"
             precipitation_unit: "mm" or "inch"
-        
+
         Returns:
             Complete forecast with current, hourly, and daily data
         """
@@ -364,7 +365,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "visibility",
             "uv_index",
         ]
-        
+
         daily_vars = [
             "temperature_2m_max",
             "temperature_2m_min",
@@ -382,7 +383,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "weather_code",
             "uv_index_max",
         ]
-        
+
         current_vars = [
             "temperature_2m",
             "relative_humidity_2m",
@@ -394,7 +395,7 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "cloud_cover",
             "visibility",
         ]
-        
+
         response = await client.get_forecast(
             latitude=latitude,
             longitude=longitude,
@@ -407,8 +408,8 @@ def register_forecast_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             wind_speed_unit=wind_speed_unit,
             precipitation_unit=precipitation_unit,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         return response.data

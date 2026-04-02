@@ -14,7 +14,7 @@ from ..client import OpenMeteoClient
 
 def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     """Register all historical weather tools with the MCP server."""
-    
+
     @mcp.tool()
     async def get_historical_hourly(
         latitude: float,
@@ -30,16 +30,16 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get historical hourly weather data for a date range.
-        
+
         Historical data is based on reanalysis datasets (ERA5, ERA5-Land, IFS)
         combining weather station, aircraft, buoy, radar, and satellite observations.
-        
+
         Data availability by model:
         - ERA5: 1940-present (global, 0.25° resolution)
         - ERA5-Land: 1950-present (global, 0.1° resolution)
         - ECMWF IFS: 2017-present (global, 9km resolution, highest accuracy)
         - CERRA: 1985-2021 (Europe only, 5km resolution)
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -67,10 +67,10 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             temperature_unit: "celsius" or "fahrenheit"
             wind_speed_unit: "kmh", "ms", "mph", or "kn"
             precipitation_unit: "mm" or "inch"
-        
+
         Returns:
             Historical hourly data with timestamps and variable values
-        
+
         Example:
             get_historical_hourly(
                 latitude=52.52,
@@ -93,7 +93,7 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "pressure_msl",
                 "shortwave_radiation",
             ]
-        
+
         response = await client.get_historical(
             latitude=latitude,
             longitude=longitude,
@@ -106,10 +106,10 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             wind_speed_unit=wind_speed_unit,
             precipitation_unit=precipitation_unit,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         return {
             "location": {
@@ -125,7 +125,7 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             },
             "model": data.get("current_weather", {}).get("model", models or "best_match"),
         }
-    
+
     @mcp.tool()
     async def get_historical_daily(
         latitude: float,
@@ -141,9 +141,9 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get historical daily aggregated weather data.
-        
+
         Daily values are aggregated from hourly data (min, max, sum, mean).
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -170,7 +170,7 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             temperature_unit: "celsius" or "fahrenheit"
             wind_speed_unit: "kmh", "ms", "mph", or "kn"
             precipitation_unit: "mm" or "inch"
-        
+
         Returns:
             Historical daily data with dates and aggregated values
         """
@@ -193,7 +193,7 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "shortwave_radiation_sum",
                 "et0_fao_evapotranspiration",
             ]
-        
+
         response = await client.get_historical(
             latitude=latitude,
             longitude=longitude,
@@ -206,10 +206,10 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             wind_speed_unit=wind_speed_unit,
             precipitation_unit=precipitation_unit,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         return {
             "location": {
@@ -224,7 +224,7 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "end_date": end_date,
             },
         }
-    
+
     @mcp.tool()
     async def get_historical_temperature_extremes(
         latitude: float,
@@ -236,9 +236,9 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get historical temperature extremes for a period.
-        
+
         Retrieves maximum and minimum temperatures with their occurrence times.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -246,7 +246,7 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             end_date: End date in ISO format (YYYY-MM-DD)
             timezone: Timezone for the response
             temperature_unit: "celsius" or "fahrenheit"
-        
+
         Returns:
             Temperature extremes including max/min values and timestamps
         """
@@ -256,7 +256,7 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             "temperature_2m_min",
             "apparent_temperature",
         ]
-        
+
         response = await client.get_historical(
             latitude=latitude,
             longitude=longitude,
@@ -266,17 +266,17 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             timezone=timezone,
             temperature_unit=temperature_unit,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         hourly = data.get("hourly", {})
         time = hourly.get("time", [])
         temp = hourly.get("temperature_2m", [])
         temp_max = hourly.get("temperature_2m_max", [])
         temp_min = hourly.get("temperature_2m_min", [])
-        
+
         # Calculate extremes
         result = {
             "location": {
@@ -289,7 +289,7 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             },
             "extremes": {},
         }
-        
+
         if temp_max:
             max_value = max(temp_max)
             max_index = temp_max.index(max_value)
@@ -298,7 +298,7 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "unit": temperature_unit,
                 "time": time[max_index] if max_index < len(time) else None,
             }
-        
+
         if temp_min:
             min_value = min(temp_min)
             min_index = temp_min.index(min_value)
@@ -307,12 +307,12 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "unit": temperature_unit,
                 "time": time[min_index] if min_index < len(time) else None,
             }
-        
+
         if temp:
             result["extremes"]["average"] = sum(temp) / len(temp) if temp else None
-        
+
         return result
-    
+
     @mcp.tool()
     async def get_historical_precipitation_analysis(
         latitude: float,
@@ -324,9 +324,9 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get historical precipitation analysis for a period.
-        
+
         Calculates total, average, rainy days, and daily breakdown.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -334,12 +334,12 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             end_date: End date in ISO format (YYYY-MM-DD)
             timezone: Timezone for the response
             precipitation_unit: "mm" or "inch"
-        
+
         Returns:
             Precipitation analysis with totals, averages, and daily data
         """
         variables = ["precipitation", "rain", "snowfall"]
-        
+
         response = await client.get_historical(
             latitude=latitude,
             longitude=longitude,
@@ -349,25 +349,25 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             timezone=timezone,
             precipitation_unit=precipitation_unit,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         hourly = data.get("hourly", {})
         time = hourly.get("time", [])
         precip = hourly.get("precipitation", [])
         rain = hourly.get("rain", [])
         snow = hourly.get("snowfall", [])
-        
+
         # Calculate statistics
         total_precip = sum(precip) if precip else 0
         total_rain = sum(rain) if rain else 0
         total_snow = sum(snow) if snow else 0
-        
+
         # Count rainy hours
         rainy_hours = sum(1 for p in precip if p > 0)
-        
+
         result = {
             "location": {
                 "latitude": data.get("latitude"),
@@ -385,7 +385,7 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "unit": precipitation_unit,
             },
         }
-        
+
         # Add daily breakdown if data available
         if time and precip:
             daily_totals = {}
@@ -394,11 +394,11 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 if day not in daily_totals:
                     daily_totals[day] = 0
                 daily_totals[day] += precip[i] if i < len(precip) else 0
-            
+
             result["daily_breakdown"] = daily_totals
-        
+
         return result
-    
+
     @mcp.tool()
     async def get_historical_wind_analysis(
         latitude: float,
@@ -410,9 +410,9 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ) -> dict[str, Any]:
         """
         Get historical wind analysis for a period.
-        
+
         Calculates max wind speed, dominant direction, and statistics.
-        
+
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
@@ -420,12 +420,12 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             end_date: End date in ISO format (YYYY-MM-DD)
             timezone: Timezone for the response
             wind_speed_unit: "kmh", "ms", "mph", or "kn"
-        
+
         Returns:
             Wind analysis with max speed, average, and direction statistics
         """
         variables = ["wind_speed_10m", "wind_direction_10m", "wind_gusts_10m"]
-        
+
         response = await client.get_historical(
             latitude=latitude,
             longitude=longitude,
@@ -435,16 +435,16 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             timezone=timezone,
             wind_speed_unit=wind_speed_unit,
         )
-        
+
         if not response.success:
             return {"error": response.error_message}
-        
+
         data = response.data
         hourly = data.get("hourly", {})
         wind_speed = hourly.get("wind_speed_10m", [])
         wind_dir = hourly.get("wind_direction_10m", [])
         wind_gusts = hourly.get("wind_gusts_10m", [])
-        
+
         result = {
             "location": {
                 "latitude": data.get("latitude"),
@@ -461,14 +461,15 @@ def register_historical_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "unit": wind_speed_unit,
             },
         }
-        
+
         # Calculate dominant wind direction
         if wind_dir:
             # Convert to vectors for proper averaging
             import math
+
             sin_sum = sum(math.sin(math.radians(d)) for d in wind_dir if d is not None)
             cos_sum = sum(math.cos(math.radians(d)) for d in wind_dir if d is not None)
             avg_direction = math.degrees(math.atan2(sin_sum, cos_sum)) % 360
             result["analysis"]["dominant_wind_direction"] = avg_direction
-        
+
         return result
