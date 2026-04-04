@@ -5,7 +5,6 @@ Provides tools that analyze weather data and produce metadata for visualization.
 Similar to pg-mcp server's visualization tools, but for weather data.
 """
 
-import json
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
