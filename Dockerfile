@@ -37,7 +37,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy application code
 COPY --chown=appuser:appgroup src/ src/
 COPY --chown=appuser:appgroup README.md .
-COPY --chown=appuser:appgroup QUICKSTART.md .
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

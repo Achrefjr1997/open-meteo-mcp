@@ -1,6 +1,6 @@
 """MCP Tools for Open-Meteo API."""
 
-from . import forecast, historical, air_quality, geocoding, ensemble, marine, specialized
+from . import forecast, historical, air_quality, geocoding, ensemble, marine, specialized, viz
 
 __all__ = [
     "forecast",
@@ -10,4 +10,5 @@ __all__ = [
     "ensemble",
     "marine",
     "specialized",
+    "viz",
 ]

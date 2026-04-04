@@ -7,12 +7,24 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production
-    container_name: open-meteo-mcp
+    container_name: open-meteo-mcp-server
+    env_file:
+      - .env
     environment:
       - OPEN_METEO_API_KEY=${OPEN_METEO_API_KEY:-}
       - OPEN_METEO_TIMEOUT=30.0
       - OPEN_METEO_TIMEZONE=GMT
       - OPEN_METEO_RATE_LIMIT=0.1
+      # API Base URLs
+      - OPEN_METEO_API_URL=https://api.open-meteo.com
+      - OPEN_METEO_AIR_QUALITY_API_URL=https://air-quality-api.open-meteo.com
+      - OPEN_METEO_MARINE_API_URL=https://marine-api.open-meteo.com
+      - OPEN_METEO_ARCHIVE_API_URL=https://archive-api.open-meteo.com
+      - OPEN_METEO_SEASONAL_API_URL=https://seasonal-api.open-meteo.com
+      - OPEN_METEO_ENSEMBLE_API_URL=https://ensemble-api.open-meteo.com
+      - OPEN_METEO_GEOCODING_API_URL=https://geocoding-api.open-meteo.com
+      - OPEN_METEO_FLOOD_API_URL=https://flood-api.open-meteo.com
+      - OPEN_METEO_CLIMATE_API_URL=https://climate-api.open-meteo.com
     restart: unless-stopped
     # For stdio transport, no ports needed (communicates via stdin/stdout)
     stdin_open: true
@@ -27,15 +39,27 @@ services:
     container_name: open-meteo-mcp-sse
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - OPEN_METEO_API_KEY=${OPEN_METEO_API_KEY:-}
       - OPEN_METEO_TIMEOUT=30.0
       - OPEN_METEO_TIMEZONE=GMT
       - OPEN_METEO_RATE_LIMIT=0.1
-    command: ["python", "-m", "src.server", "--transport", "sse", "--port", "8000"]
+      # API Base URLs
+      - OPEN_METEO_API_URL=https://api.open-meteo.com
+      - OPEN_METEO_AIR_QUALITY_API_URL=https://air-quality-api.open-meteo.com
+      - OPEN_METEO_MARINE_API_URL=https://marine-api.open-meteo.com
+      - OPEN_METEO_ARCHIVE_API_URL=https://archive-api.open-meteo.com
+      - OPEN_METEO_SEASONAL_API_URL=https://seasonal-api.open-meteo.com
+      - OPEN_METEO_ENSEMBLE_API_URL=https://ensemble-api.open-meteo.com
+      - OPEN_METEO_GEOCODING_API_URL=https://geocoding-api.open-meteo.com
+      - OPEN_METEO_FLOOD_API_URL=https://flood-api.open-meteo.com
+      - OPEN_METEO_CLIMATE_API_URL=https://climate-api.open-meteo.com
+    command: ["python", "-m", "src.server", "--transport", "sse", "--host", "0.0.0.0", "--port", "8000"]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/sse')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -48,6 +72,8 @@ services:
       dockerfile: Dockerfile
       target: development
     container_name: open-meteo-mcp-dev
+    env_file:
+      - .env
     volumes:
       - ./src:/app/src:ro
       - ./tests:/app/tests:ro
@@ -55,6 +81,9 @@ services:
       - OPEN_METEO_API_KEY=${OPEN_METEO_API_KEY:-}
       - OPEN_METEO_TIMEOUT=30.0
       - OPEN_METEO_TIMEZONE=GMT
+      - OPEN_METEO_API_URL=https://api.open-meteo.com
+      - OPEN_METEO_AIR_QUALITY_API_URL=https://air-quality-api.open-meteo.com
+      - OPEN_METEO_GEOCODING_API_URL=https://geocoding-api.open-meteo.com
     command: ["python", "-m", "pytest", "tests/", "-v", "--tb=short"]
     profiles:
       - dev
@@ -66,11 +95,16 @@ services:
       dockerfile: Dockerfile
       target: development
     container_name: open-meteo-mcp-test
+    env_file:
+      - .env
     volumes:
       - ./src:/app/src:ro
       - ./tests:/app/tests:ro
     environment:
       - OPEN_METEO_API_KEY=${OPEN_METEO_API_KEY:-}
+      - OPEN_METEO_API_URL=https://api.open-meteo.com
+      - OPEN_METEO_AIR_QUALITY_API_URL=https://air-quality-api.open-meteo.com
+      - OPEN_METEO_GEOCODING_API_URL=https://geocoding-api.open-meteo.com
     command: ["python", "-m", "pytest", "tests/", "-v", "--tb=short", "--cov=src"]
     profiles:
       - test

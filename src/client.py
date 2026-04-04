@@ -40,7 +40,7 @@ class APIEndpoint(Enum):
     """Open-Meteo API endpoints."""
 
     FORECAST = "forecast"
-    HISTORICAL = "historical-weather"
+    HISTORICAL = "archive"  # Historical data uses archive API endpoint
     AIR_QUALITY = "air-quality"
     GEOCODING_SEARCH = "geocoding/search"
     GEOCODING_GET = "geocoding/get"
@@ -219,7 +219,7 @@ class OpenMeteoClient:
         """Get the appropriate base URL for an endpoint."""
         endpoint_url_map = {
             APIEndpoint.FORECAST: self.config.forecast_base_url,
-            APIEndpoint.HISTORICAL: self.config.forecast_base_url,
+            APIEndpoint.HISTORICAL: self.config.archive_base_url,  # Historical data uses archive API
             APIEndpoint.AIR_QUALITY: self.config.air_quality_base_url,
             APIEndpoint.GEOCODING_SEARCH: self.config.geocoding_base_url,
             APIEndpoint.GEOCODING_GET: self.config.geocoding_base_url,
@@ -660,7 +660,7 @@ class OpenMeteoClient:
         """Get elevation data for coordinates."""
         self._validate_coordinates(latitude, longitude)
 
-        params = {"lat": latitude, "lon": longitude}
+        params = {"latitude": latitude, "longitude": longitude}
         return await self._request(APIEndpoint.ELEVATION, params)
 
     async def get_climate(
@@ -673,7 +673,7 @@ class OpenMeteoClient:
         timezone: str | None = None,
         timeformat: Literal["iso8601", "unixtime"] | None = None,
     ) -> APIResponse:
-        """Get climate data."""
+        """Get climate data (historical daily data for climate analysis)."""
         self._validate_coordinates(latitude, longitude)
 
         params = self._build_params(

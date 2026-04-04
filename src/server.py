@@ -5,13 +5,18 @@ This module creates and configures the MCP server, registering all tools,
 resources, and prompts for the Open-Meteo weather API.
 """
 
+import asyncio
+import atexit
 import os
 from mcp.server.fastmcp import FastMCP
 
 from .client import OpenMeteoClient, ClientConfig
-from .tools import forecast, historical, air_quality, geocoding, ensemble, marine, specialized
+from .tools import forecast, historical, air_quality, geocoding, ensemble, marine, specialized, viz
 from .resources import variables as variables_resources, models as models_resources
 from .prompts import weather_assistant
+
+# Global client reference for cleanup
+_client_instance: OpenMeteoClient | None = None
 
 # ==================== Server Configuration ====================
 
@@ -62,6 +67,7 @@ def register_all_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     ensemble.register_ensemble_tools(mcp, client)
     marine.register_marine_tools(mcp, client)
     specialized.register_specialized_tools(mcp, client)
+    viz.register_viz_tools(mcp, client)
 
 
 def register_all_resources(mcp: FastMCP) -> None:
@@ -77,11 +83,14 @@ def register_all_prompts(mcp: FastMCP) -> None:
 
 def create_app() -> FastMCP:
     """Create the complete MCP application."""
+    global _client_instance
+
     # Create server
     mcp = create_mcp_server()
 
     # Create client
     client = create_client_from_env()
+    _client_instance = client
 
     # Register all components
     register_all_tools(mcp, client)
@@ -91,17 +100,46 @@ def create_app() -> FastMCP:
     return mcp
 
 
+async def _cleanup_client() -> None:
+    """Async cleanup for the HTTP client."""
+    global _client_instance
+    if _client_instance:
+        await _client_instance.close()
+
+
+def _shutdown_hook() -> None:
+    """Shutdown hook to close HTTP client connections."""
+    global _client_instance
+    if _client_instance:
+        try:
+            # Try to run the async cleanup in the current event loop
+            loop = asyncio.get_event_loop()
+            if not loop.is_closed():
+                loop.run_until_complete(_cleanup_client())
+        except RuntimeError:
+            # No event loop exists, create a new one
+            asyncio.run(_cleanup_client())
+        except Exception:
+            # Ignore errors during shutdown
+            pass
+
+
 # ==================== Main Entry Point ====================
 
 
 def main() -> None:
     """Main entry point for the MCP server."""
+    # Register shutdown hook for cleanup
+    atexit.register(_shutdown_hook)
+
     mcp = create_app()
     mcp.run()
 
 
 def run_stdio() -> None:
     """Run the server with stdio transport."""
+    atexit.register(_shutdown_hook)
+
     mcp = create_app()
     mcp.run(transport="stdio")
 
@@ -110,9 +148,13 @@ def run_sse(host: str = "0.0.0.0", port: int = 8000) -> None:
     """Run the server with SSE transport for remote access using uvicorn."""
     import uvicorn
 
+    # Register shutdown hook for cleanup
+    atexit.register(_shutdown_hook)
+
     mcp = create_app()
-    # Get the SSE Starlette app from FastMCP
+    # Get the SSE Starlette app from FastMCP (call the method!)
     app = mcp.sse_app()
+    
     uvicorn.run(app, host=host, port=port, log_level="info")
 
 
@@ -147,8 +189,8 @@ Examples:
     parser.add_argument(
         "--transport",
         choices=["stdio", "sse"],
-        default="stdio",
-        help="Transport protocol (default: stdio)",
+        default="sse",
+        help="Transport protocol (default: sse)",
     )
 
     parser.add_argument(

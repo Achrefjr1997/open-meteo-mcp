@@ -62,13 +62,11 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "wind_wave_height",
                 "wind_wave_period",
                 "wind_wave_direction",
-                "swell_height",
-                "swell_period",
-                "swell_direction",
+                "swell_wave_height",
+                "swell_wave_period",
+                "swell_wave_direction",
                 "wind_speed_10m",
                 "wind_direction_10m",
-                "temperature_2m",
-                "weather_code",
             ]
 
         response = await client.get_marine(
@@ -120,7 +118,9 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
             return {"error": response.error_message}
 
         data = response.data
-        elevation = data.get("elevation", 0)
+        # Elevation API returns a list, extract first element
+        elevation_data = data.get("elevation", [])
+        elevation = elevation_data[0] if isinstance(elevation_data, list) and len(elevation_data) > 0 else elevation_data
 
         return {
             "location": {
@@ -137,48 +137,44 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
     async def get_climate_data(
         latitude: float,
         longitude: float,
-        start_year: int = 1991,
-        end_year: int = 2020,
+        year: int = 2025,
         variables: list[str] | None = None,
         timezone: str = "GMT",
     ) -> dict[str, Any]:
         """
-        Get climate data for long-term weather patterns.
+        Get historical climate data for a specific year.
 
-        Climate data provides monthly averages and extremes over
-        multi-decade periods (typically 30-year climate normals).
+        Retrieves daily weather data for climate analysis.
 
         Args:
             latitude: Latitude coordinate (-90 to 90)
             longitude: Longitude coordinate (-180 to 180)
-            start_year: Start year for climate period (default: 1991)
-            end_year: End year for climate period (default: 2020)
+            year: Year to retrieve data for (default: 2025)
             variables: Climate variables. Options include:
-                temperature_2m_mean: Mean monthly temperature
-                temperature_2m_max_mean: Mean monthly maximum temperature
-                temperature_2m_min_mean: Mean monthly minimum temperature
-                precipitation_sum: Monthly precipitation sum
-                sunshine_duration: Monthly sunshine duration
-                et0_fao_evapotranspiration: Monthly evapotranspiration
+                temperature_2m_mean: Daily mean temperature
+                temperature_2m_max: Daily maximum temperature
+                temperature_2m_min: Daily minimum temperature
+                precipitation_sum: Daily precipitation sum
+                sunshine_duration: Daily sunshine duration
+                et0_fao_evapotranspiration: Daily evapotranspiration
             timezone: Timezone for the response
 
         Returns:
-            Climate data with monthly averages and statistics
+            Daily climate data for the specified year
         """
         if variables is None:
             variables = [
                 "temperature_2m_mean",
-                "temperature_2m_max_mean",
-                "temperature_2m_min_mean",
+                "temperature_2m_max",
+                "temperature_2m_min",
                 "precipitation_sum",
-                "sunshine_duration",
             ]
 
         response = await client.get_climate(
             latitude=latitude,
             longitude=longitude,
-            start_date=f"{start_year}-01-01",
-            end_date=f"{end_year}-12-31",
+            start_date=f"{year}-01-01",
+            end_date=f"{year}-12-31",
             daily=variables,
             timezone=timezone,
         )
@@ -192,11 +188,7 @@ def register_marine_tools(mcp: FastMCP, client: OpenMeteoClient) -> None:
                 "latitude": data.get("latitude"),
                 "longitude": data.get("longitude"),
             },
-            "climate_period": {
-                "start_year": start_year,
-                "end_year": end_year,
-                "years": end_year - start_year + 1,
-            },
+            "year": year,
             "daily": data.get("daily", {}),
         }
 
@@ -277,8 +269,9 @@ def _summarize_marine_conditions(hourly: dict) -> dict[str, Any]:
     if not hourly:
         return {}
 
-    wave_height = hourly.get("wave_height", [])
-    wind_speed = hourly.get("wind_speed_10m", [])
+    # Filter out None values from lists
+    wave_height = [h for h in hourly.get("wave_height", []) if h is not None]
+    wind_speed = [w for w in hourly.get("wind_speed_10m", []) if w is not None]
 
     summary = {}
 

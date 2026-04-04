@@ -26,7 +26,6 @@ share/python-wheels/
 MANIFEST
 
 # Virtual environments
-# Exclude from git but keep a template
 venv/
 ENV/
 env/
@@ -54,6 +53,9 @@ coverage.xml
 .dmypy.json
 dmypy.json
 .pytype/
+
+# Linting
+.ruff_cache/
 
 # ==================== IDE ====================
 # VS Code
@@ -134,11 +136,6 @@ $RECYCLE.BIN/
 *.sqlite
 *.sqlite3
 
-# Lock files (keep uv.lock for reproducible builds)
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
-
 # Docker
 .docker/
 
@@ -156,6 +153,10 @@ uv.lock
 
 # Batch scripts (project specific)
 push-to-github.bat
+
+# Demo and test scripts
+demo.py
+test_api.py
 
 # ==================== Secrets & Credentials ====================
 # Never commit these
